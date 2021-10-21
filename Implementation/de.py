@@ -239,7 +239,16 @@ class Individual:
                     self.report()
 
 
-def DE(samples, num_gen, size, cr, fx, ranges, signal, scale, fs, maximization=True):
+def stop_condition(method, current_gen, num_gen, current_evals, num_evals):
+    if method == 'Gen':
+        return current_gen != num_gen
+    elif method == 'Eval':
+        return current_evals <= num_evals
+    elif method == 'Hyb':
+        return current_gen != num_gen and current_evals <= num_evals
+
+
+def DE(samples, num_gen, size, cr, fx, ranges, signal, scale, fs, total_eval, stop='Gen', maximization=True):
     """
     Pure DE/rand/1/bin.
 
@@ -254,6 +263,12 @@ def DE(samples, num_gen, size, cr, fx, ranges, signal, scale, fs, maximization=T
     :param np.ndarray signal: Signal to be transform.
     :param float scale: Signal scale.
     :param int fs: Sampling frequency.
+    :param int total_eval: Total number of evaluations.
+    :param str stop: Stop condition. Acceptable values are:
+                                        'Gen'   -> Stop at num_gen generation.
+                                        'Eval'  -> Stop at total_eval evaluation.
+                                        'Hyb'   -> Stop at num_gen generation or total_eval evaluation
+                                                    (whichever happens first).
     :param bool maximization: Whether the objective function must be maximize.
     :return: bests: All best individual per generation [List of class Individual].
              best_aptitude: Best last aptitude [Float].
@@ -261,6 +276,7 @@ def DE(samples, num_gen, size, cr, fx, ranges, signal, scale, fs, maximization=T
     """
     # Variables
     current_gen = 0
+    evals = size
     bests = []
 
     # Initial population
@@ -278,9 +294,10 @@ def DE(samples, num_gen, size, cr, fx, ranges, signal, scale, fs, maximization=T
     print(f'Gen 0: {population[0].report()}')
 
     # DE: Main Loop
-    while current_gen != num_gen:
+    while stop_condition(stop, current_gen, num_gen, evals, total_eval):
         # Increase generation counter
         current_gen += 1
+        evals += size
         # DE: Mutation-Crossover
         all_targets = [target.give_values() for target in population]
         for i in range(size):
@@ -311,8 +328,9 @@ if __name__ == '__main__':
     import time
 
     freq = 1000
-    size_ = 26
-    gens = 280
+    size_ = 10
+    evals_ = 25
+    gens = 5
     cr_ = 2.30508822
     fx_ = 0.65115977
     ranges_ = [[16, 80],
@@ -333,6 +351,6 @@ if __name__ == '__main__':
                        rangeCut=ranges_[1],
                        rangeThreshold=ranges_[2])
 
-    res, apts, _ = DE(init_samples, gens, size_, cr_, fx_, ranges_, original, scale_, freq)
+    res, apts, _ = DE(init_samples, gens, size_, cr_, fx_, ranges_, original, scale_, freq, evals_, 'Hyb')
 
     print(f'Total time: {time.time() - stime}')

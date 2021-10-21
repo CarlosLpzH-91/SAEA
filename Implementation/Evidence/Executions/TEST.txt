@@ -1,4 +1,6 @@
 1:
 DE - KADE-2% - KADE-5-10%
 2:
-DE(Irace) - KADE-2% - KADE-5-10%
+KADE-10% - KADE-5% - KADE-2%
+3:
+KADE-10-10% - KADE-10-5% - KADE-10-2%

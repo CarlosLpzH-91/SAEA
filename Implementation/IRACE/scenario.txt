@@ -33,7 +33,7 @@ digits = 8
 
 ## Number of calls to targetRunner to execute in parallel. Values 0 or 1
 ## mean no parallelization.
-parallel = 3
+parallel = 4
 
 ## File that contains a list of logical expressions that cannot be TRUE
 ## for any evaluated configuration. If empty or NULL, do not use forbidden
