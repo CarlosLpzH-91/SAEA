@@ -8,7 +8,7 @@ from lhs import LHS
 
 def main(pop, cr, fx, datafile):
     gen = 200  # Defaul
-    evals = 10000
+    evals = 8000
     freq = 1000
     ranges = [[16, 80],
               [20, 80],

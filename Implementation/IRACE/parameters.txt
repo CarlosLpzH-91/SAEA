@@ -26,6 +26,6 @@
 ##    condition is satisfied, FALSE otherwise.
 
 # 1:            2:            3: 4:          5:
-population      "--pop="      i  (1, 200)
+population      "--pop="      i  (1, 300)
 cr              "--cr="       r  (0.01, 4)
 fx              "--fx="       r  (0.01, 4)
