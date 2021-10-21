@@ -39,7 +39,7 @@ ranges = [[16, 80],
           [0.8, 1.1]]
 # DE related
 size = 50
-generations = [50, 100, 100]  # [name1, name2 - name3] - [200, 100, 300]
+generations = [50, 50, 100]  # [name1, name2 - name3] - [200, 100, 300]
 cr = 0.8
 fx = 0.5
 # KADE related

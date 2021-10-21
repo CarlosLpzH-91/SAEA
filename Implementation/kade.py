@@ -208,7 +208,6 @@ def KADE(signal, scale, fs, ranges, samples,
         rbf_ls_bounds = [(1e-5, 1e5)] * 3
 
     n_selection = ceil(size * prc_selection)
-    print(f'{size} - {prc_selection} - {size*prc_selection} ({n_selection})')
 
     # Initial Evaluations: Expensive
     aptitudes = np.array([get_real(sample, signal, scale, fs) for sample in samples])
