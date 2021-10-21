@@ -1,0 +1,47 @@
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+| |   Instance|      Alive|       Best|      Mean best| Exp so far|  W time|  rho|KenW|  Qvar|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+|x|         10|         10|         25|   -9.311749716|         10|00:52:45|   NA|  NA|    NA|
+|x|          8|         10|         25|   -9.311749716|         16|00:34:43|-0.02|0.49|0.8232|
+|x|          4|         10|         25|   -9.311749713|         22|00:34:05|+0.12|0.42|0.8605|
+|x|          6|         10|         25|   -9.311740875|         28|00:35:07|+0.23|0.42|0.6934|
+|-|          3|          7|         25|   -9.311742643|         34|00:34:22|+0.10|0.28|0.7030|
+|=|          5|          7|         25|   -9.311743821|         37|00:23:30|+0.13|0.27|0.7259|
+|=|          2|          7|         25|   -9.305592123|         40|00:23:44|+0.06|0.19|0.8103|
+|=|          1|          7|         25|   -9.306361737|         43|00:23:38|+0.00|0.12|0.8598|
+|=|          7|          7|         25|   -9.306960394|         46|00:23:57|+0.03|0.14|0.8835|
+|=|          9|          7|         25|   -9.307439326|         49|00:23:59|+0.05|0.15|0.8839|
+|=|         11|          7|         24|   -9.298483038|         56|00:42:41|+0.04|0.13|0.9086|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+Best-so-far configuration:          24    mean value:    -9.298483038
+Description of the best-so-far configuration:
+   .ID. population generations         cr         fx .PARENT.
+24   24         26         280 2.30508822 0.65115977        6
+
+# 2021-10-20 11:52:57 CDT: Elite configurations (first number is the configuration ID; listed from best to worst according to the sum of ranks):
+   population generations         cr         fx
+24         26         280 2.30508822 0.65115977
+25         32         282 1.68703652 0.77798879
+6          34         256 2.30682715 0.47846386
+23         40         276 2.18542094 0.41712312
+# 2021-10-20 11:52:57 CDT: Stopped because there is not enough budget left to race more than the minimum (4)
+# You may either increase the budget or set 'minNbSurvival' to a lower value
+# Iteration: 5
+# nbIterations: 5
+# experimentsUsedSoFar: 187
+# timeUsed: 0
+# remainingBudget: 13
+# currentBudget: 13
+# number of elites: 4
+# nbConfigurations: 4
+# Best configurations (first number is the configuration ID; listed from best to worst according to the sum of ranks):
+   population generations         cr         fx
+24         26         280 2.30508822 0.65115977
+25         32         282 1.68703652 0.77798879
+6          34         256 2.30682715 0.47846386
+23         40         276 2.18542094 0.41712312
+# Best configurations as commandlines (first number is the configuration ID; same order as above):
+24  --pop=26 --gen=280 --cr=2.30508822 --fx=0.65115977
+25  --pop=32 --gen=282 --cr=1.68703652 --fx=0.77798879
+6   --pop=34 --gen=256 --cr=2.30682715 --fx=0.47846386
+23  --pop=40 --gen=276 --cr=2.18542094 --fx=0.41712312
