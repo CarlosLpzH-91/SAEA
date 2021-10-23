@@ -11,12 +11,12 @@ from Implementation.lhs import LHS
 
 # Number of executions
 execs = 30
-test = 2
+test = 3
 
 # Variables
-name1 = 'KADE-10%'
-name2 = 'KADE-5%'
-name3 = 'KADE-2%'
+name1 = 'KADE-2-5%'
+name2 = 'KADE-2-2%'
+name3 = 'KADE-5%'
 hist1 = []
 hist2 = []
 hist3 = []
@@ -39,12 +39,12 @@ ranges = [[16, 80],
           [0.8, 1.1]]
 # DE related
 size = 50
-generations = [50, 50, 100]  # [name1, name2 - name3] - [200, 100, 300]
+generations = [100, 200, 50]  # [name1, name2 - name3] - [200, 100, 300]
 cr = 0.8
 fx = 0.5
 # KADE related
-update = [1, 1, 1]
-prc_select = [0.1, 0.05, 0.02]
+update = [2, 2, 1]
+prc_select = [0.05, 0.02, 0.05]
 c_v = 1.0
 c_v_bouds = (1e-5, 1e5)
 rbf_ls = np.ones(3)
