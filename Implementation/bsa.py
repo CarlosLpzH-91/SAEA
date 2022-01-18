@@ -95,16 +95,21 @@ class BSA:
 
         return snr
 
+    @classmethod
+    def AFR(cls, spikes):
+        return np.mean(np.abs(spikes))
+
 
 if __name__ == '__main__':
     import scipy.io as scio
     import matplotlib.pyplot as plt
 
-    siz = 61  # 41, 57
-    cut = 20.00003094  # 52, 42,
-    thr = 0.94415867  # 0.96, 0.94
+    siz = 77  # 41, 57
+    cut = 20.36221972  # 52, 42,
+    thr = 0.95286996  # 0.96, 0.94
 
-    ori_signal = scio.loadmat('../Signals/Tests/Signal_S_E2_2.mat')['signal'].T[0]
+    # ori_signal = scio.loadmat('../Signals/Tests/Signal_S_E2_2.mat')['signal'].T[0]
+    ori_signal = scio.loadmat('../Signals/chb01_09_C1.mat')['c1'][0][:10000]
     shift = ori_signal.min()
     ori_signal = ori_signal - shift
     scale_ = ori_signal.max() * 2
@@ -118,5 +123,11 @@ if __name__ == '__main__':
     decoded = spiker.decode(encoded)
 
     snr = spiker.SNR(ori_signal, decoded)
+    afr = spiker.AFR(encoded)
+
+    # scio.savemat('Evidence/Final/KADE5U_EEG.mat', {'decoded': decoded})
+    # plt.plot(ori_signal)
+    # plt.plot(decoded)
+
 
 

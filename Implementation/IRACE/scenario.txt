@@ -29,11 +29,11 @@ maxExperiments = 1000
 
 ## Maximum number of decimal places that are significant for numerical
 ## (real) parameters.
-digits = 8
+digits = 2
 
 ## Number of calls to targetRunner to execute in parallel. Values 0 or 1
 ## mean no parallelization.
-parallel = 4
+parallel = 2
 
 ## File that contains a list of logical expressions that cannot be TRUE
 ## for any evaluated configuration. If empty or NULL, do not use forbidden

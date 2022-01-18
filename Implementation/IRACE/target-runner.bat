@@ -19,8 +19,10 @@
 @echo off
 
 :: Please change the EXE and FIXED_PARAMS to the correct ones
-SET "exe=../de_irace.py"
-SET "fixed_params=--time 20 --tries 1 --quiet"
+::SET "exe=../de_irace.py"
+SET "exe=../kade_irace.py"
+SET "fixed_params=--time 10 --tries 1 "
+::SET "fixed_params=--time 20 --tries 1 --quiet"
 
 FOR /f "tokens=1-4*" %%a IN ("%*") DO (
 	SET candidate=%%a

@@ -328,11 +328,11 @@ if __name__ == '__main__':
     import time
 
     freq = 1000
-    size_ = 10
+    size_ = 50
     evals_ = 25
-    gens = 5
-    cr_ = 2.30508822
-    fx_ = 0.65115977
+    gens = 100
+    cr_ = 2.82
+    fx_ = 0.65
     ranges_ = [[16, 80],
                [20, 80],
                [0.8, 1.1]]
@@ -351,6 +351,6 @@ if __name__ == '__main__':
                        rangeCut=ranges_[1],
                        rangeThreshold=ranges_[2])
 
-    res, apts, _ = DE(init_samples, gens, size_, cr_, fx_, ranges_, original, scale_, freq, evals_, 'Hyb')
+    res, apts, _ = DE(init_samples, gens, size_, cr_, fx_, ranges_, original, scale_, freq, evals_, 'Gen')
 
     print(f'Total time: {time.time() - stime}')

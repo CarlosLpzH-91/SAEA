@@ -26,6 +26,7 @@
 ##    condition is satisfied, FALSE otherwise.
 
 # 1:            2:            3: 4:          5:
-population      "--pop="      i  (1, 300)
 cr              "--cr="       r  (0.01, 4)
 fx              "--fx="       r  (0.01, 4)
+a               "--a="        o  (1e-12,1e-11,1e-10,1e-9,1e-8, 1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1)
+n_rest          "--n_rest="   o  (100,80,60,50,40,30,20,10,5,4,3,2,1)

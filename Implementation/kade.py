@@ -7,13 +7,14 @@ import numpy as np
 from math import ceil
 import copy
 import matplotlib.pyplot as plt
-from Implementation.bsa import get_real
-from Implementation.lhs import LHS
-from Implementation.de import Individual
-from Implementation.kriging import Kriging
-
-# For not showing Figures interactively
-plt.ioff()
+# from Implementation.bsa import get_real
+# from Implementation.lhs import LHS
+# from Implementation.de import Individual
+# from Implementation.kriging import Kriging
+from bsa import get_real
+from lhs import LHS
+from de import Individual
+from kriging import Kriging
 
 
 def EI(y, std, y_opt=0.0, xi=0.01):
@@ -59,7 +60,7 @@ def EI(y, std, y_opt=0.0, xi=0.01):
         :param y:
     """
     # -------------------------- Modification
-    mu = y.reshape(1, -1)[0]
+    mu = y.reshape(1, -1)[0] * -1
 
     values = np.zeros_like(mu)
     mask = std > 0
@@ -72,6 +73,43 @@ def EI(y, std, y_opt=0.0, xi=0.01):
     values[mask] = exploit + explore
 
     return values
+
+
+def POI(y, std, y_opt):
+    mu = y.reshape(1, -1)[0] * -1
+
+    values = np.zeros_like(mu)
+    mask = std > 0
+    improve = y_opt - mu[mask]
+    scaled = improve / std[mask]
+    cdf = norm.cdf(scaled)
+    values[mask] = cdf
+
+    return values
+
+
+def LCB(y, std, w):
+    mu = y.reshape(1, -1)[0] * -1
+    values = mu - (w * std)
+    return values
+
+
+def selection(option, n_selection, y, sigma, y_best=0.0, xi=1.0, w=2):
+    criteria = []
+    # Uncertainty
+    if option == 'U':
+        criteria = sigma
+    elif option == 'E':
+        criteria = EI(y, sigma, -y_best, xi)
+    elif option == 'P':
+        criteria = POI(y, sigma, -y_best)
+    elif option == 'L':
+        criteria = LCB(y, sigma, w)
+    else:
+        print(f'{option} is not a valid option')
+
+    # Selected indices
+    return criteria.argsort()[-n_selection:]
 
 
 def test_one_variable(model, original, signal_scale, frequency, lml, variable='Cutoff', num=0):
@@ -153,8 +191,17 @@ def plot_comparison(name, real, predicted):
     plt.legend()
 
 
-def KADE(signal, scale, fs, ranges, samples,
-         size, num_gen, cr, fx, n_update, prc_selection,
+def stop_condition(method, current_gen, num_gen, current_evals, num_evals):
+    if method == 'Gen':
+        return current_gen != num_gen
+    elif method == 'Eval':
+        return current_evals <= num_evals
+    elif method == 'Hyb':
+        return current_gen != num_gen and current_evals <= num_evals
+
+
+def KADE(signal, scale, fs, ranges, samples, tot_evals,
+         size, num_gen, cr, fx, n_update, prc_selection, select_option='U', stop='Gen',
          c_v=1.0, c_v_bounds=(1e-5, 1e5), rbf_ls=None, rbf_ls_bounds=None,
          n_rest=10, a=1e-6, norm_y=True, re_evaluate_km=False, maximization=True, verbose=False, plot_vars=False):
     """
@@ -167,12 +214,22 @@ def KADE(signal, scale, fs, ranges, samples,
                                         [Low_Cutoff, High_Cutoff],
                                         [Low_Threshold, High_Threshold]].
     :param np.ndarray samples: Initial sampling.
+    :param int tot_evals: Total number of evaluations.
     :param int size: Population size.
     :param int num_gen: Number of generations.
     :param float cr: CR mutation value.
     :param float fx: FX modification value.
     :param int n_update: Rate at wich the model will be updated.
     :param float prc_selection: Percentage of the population to be selected for model update.
+    :param str select_option: Option to selection criteria. Valid options are:  'U' -> Uncertainty.
+                                                                                'E' -> Expected Improvement.
+                                                                                'P' -> Probability of Improvement.
+                                                                                'L' -> Lower Confidence Bound
+    :param str stop: Stop condition. Acceptable values are:
+                                        'Gen'   -> Stop at num_gen generation.
+                                        'Eval'  -> Stop at total_eval evaluation.
+                                        'Hyb'   -> Stop at num_gen generation or total_eval evaluation
+                                                    (whichever happens first).
     :param float c_v: Initial constant value for Kriging model.
     :param tuple c_v_bounds: Bounds of values for constant value of Kriging model (Low, High).
     :param np.ndarray rbf_ls: Initial values of Squared Exponential Kernel of Kriging Model.
@@ -197,10 +254,12 @@ def KADE(signal, scale, fs, ranges, samples,
     """
     # Variables
     current_gen = 0
+    evals = size
     bests = []
     differences_aptitudes = []
     sigmas = []
     lmls = []
+    y_best = 0.0
 
     if rbf_ls is None:
         rbf_ls = np.ones(3)
@@ -239,9 +298,10 @@ def KADE(signal, scale, fs, ranges, samples,
     print(f'Gen 0: {population[0].report()}')
 
     # DE: Main Loop
-    while current_gen != num_gen:
+    while stop_condition(stop, current_gen, num_gen, evals, tot_evals):
         # Increase generation counter
         current_gen += 1
+        evals += size
         # DE: Mutation-Crossover
         all_targets = [target.give_values() for target in population]
         for i in range(size):
@@ -254,9 +314,23 @@ def KADE(signal, scale, fs, ranges, samples,
 
         # KM: Update model:
         if not current_gen % n_update and current_gen != num_gen:
-            criteria = np.array([i.sigma for i in population])
-            # Select most uncertain points
-            max_indices = criteria.argsort()[-n_selection:]
+            # Criteria = Sigma
+            # criteria = np.array([i.sigma for i in population])
+            # Criteria = EI
+            # For EI-PoI-LCB
+            # y_best = population[0].aptitude
+            y_best = 0.0
+            if select_option == 'E' or select_option == 'P':
+                y_best = [i.aptitude if i.source == 'R' else 0 for i in population][0]
+
+            npApts = np.array([i.aptitude for i in population], dtype=np.int32)
+            npSigm = np.array([i.sigma for i in population], np.int32)
+            # criteria = EI(npApts, npSigm, -y_best, xi=1.0)
+            # criteria = POI(npApts, npSigm, -y_best)
+            #
+            # # Select most uncertain points
+            # max_indices = criteria.argsort()[-n_selection:]
+            max_indices = selection(select_option, n_selection, npApts, npSigm, y_best)
             new_samples = np.array([population[i].vector for i in max_indices])
 
             selected_old_aptitudes = np.array([population[i].aptitude for i in max_indices])
@@ -301,7 +375,7 @@ def KADE(signal, scale, fs, ranges, samples,
                         prediction, sigma = km.predict([individual.vector])
                         individual.aptitude = prediction[0][0]
                         individual.sigma = sigma[0]
-                        individual.source = 'KM'
+                        individual.source = 'K'
             # Mean values
             differences_aptitudes.append(np.mean(selected_old_aptitudes - new_aptitudes))
             sigmas.append(selected_sigmas.mean())
@@ -347,21 +421,23 @@ if __name__ == '__main__':
     freq = 1000
     size_pop = 50
     gens = 100
-    cr_ = 0.8
-    fx_ = 0.5
+    # cr_ = 0.8
+    # fx_ = 0.5
+    cr_ = 2.43
+    fx_ = 0.2
     ranges_ = [[16, 80],
                [20, 80],
                [0.8, 1.1]]
     update = 1
-    prc_select = 0.02
+    prc_select = 0.05
     # selection = int(size * prc_select)
     c_v_ = 1.0
     c_v_bouds_ = (1e-5, 1e5)
     rbf_ls_ = np.ones(3)
     # rbf_ls_bounds = [(1e-5, 1e5)] * 3
     rbf_ls_bounds_ = [(1e-2, 1e6), (1e-2, 1e8), (1e-5, 1e2)]
-    n_rest_ = 50
-    a_ = 1e-3
+    n_rest_ = 20
+    a_ = 1e-6
 
     # Signal
     original_signal = scio.loadmat('../Signals/Tests/Signal_S_E2_2.mat')['signal'].T[0]
@@ -379,10 +455,11 @@ if __name__ == '__main__':
                        rangeThreshold=ranges_[2])
 
     res, real_apt, best_apt, best_sig, diff, sigs, popu, lmls_ = KADE(signal=original_signal, scale=scale_, fs=freq,
-                                                                      ranges=ranges_, samples=init_samples,
-                                                                      size=size_pop, num_gen=gens, cr=cr_, fx=fx_,
-                                                                      n_update=update, prc_selection=prc_select,
-                                                                      c_v=c_v_, c_v_bounds=c_v_bouds_, rbf_ls=rbf_ls_,
+                                                                      ranges=ranges_, samples=init_samples, stop='Gen',
+                                                                      select_option='U', size=size_pop, num_gen=gens,
+                                                                      cr=cr_, fx=fx_, n_update=update, tot_evals=0,
+                                                                      prc_selection=prc_select, c_v=c_v_,
+                                                                      c_v_bounds=c_v_bouds_, rbf_ls=rbf_ls_,
                                                                       rbf_ls_bounds=rbf_ls_bounds_, n_rest=n_rest_,
                                                                       a=a_, re_evaluate_km=False, plot_vars=False,
                                                                       norm_y=True, verbose=verbose_)
